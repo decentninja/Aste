@@ -1,6 +1,7 @@
 example = """
 function test() {
 	console.log('Hello world');
+	var variable = 5;
 }
 
 test.prototype.bla = function() {
@@ -13,22 +14,55 @@ test.prototype.bla = function() {
 class File
 	# All cursors and their scope
 	selections: [
-		[0]
+		[1, 1, 0]
 	]
+
+	mode: 'visual'
 
 	constructor: (@source) ->
 		@tree = esprima.parse @source,
 			tolernat: true
 			range: true
+	
+	send: (key) ->
+		console.log key
+		for selection in @selections
+			switch key
+				when 'h'
+					selection.pop()
+				when 'l'
+					selection.push 0
+				when 'j'
+					selection[selection.length-1]++
+				when 'k'
+					selection[selection.length-1]--
+		console.log @selections[0]
 
 	computeSelections: () ->
 		selections = {}
 		for selection in @selections
 			node = @tree
-			for level in selection
-				if node.body instanceof Array
-					node = node.body[level]
+			i = 0
+			while i < selection.length
+				switch node.type
+					when 'ExpressionStatement'
+						node = node.expression
+					when 'AssignmentExpression'
+						switch selection[i]
+							when 0
+								node = node.left
+							when 1
+								node = node.right
+						i++
+					else
+						console.log "no resolve of #{node.type}, trying body"
+						if node.body instanceof Array
+							node = node.body[selection[i]]
+							i++
+						else
+							node = node.body
 			selections[node.range[0]] = node.range[1]
+		return selections
 
 
 bla = new File example
@@ -40,9 +74,17 @@ class Aste extends React.Component
 		margin: '3em'
 	selected:
 		backgroundColor: 'lightblue'
+	handleKeyDown: (event) =>
+		if @props.file.mode == 'visual'
+			key = String.fromCharCode event.keyCode
+				.toLowerCase()
+			@props.file.send key
+			@forceUpdate()		# is this needed?
+	componentDidMount: () ->
+		document.body.addEventListener 'keydown', @handleKeyDown
 	render: ->
 		characters = []
-		file = this.props.file
+		file = @props.file
 		selections = file.computeSelections()
 		i = 0
 		while i < file.source.length
