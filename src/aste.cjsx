@@ -2,6 +2,10 @@ example = """
 function test() {
 	console.log('Hello world');
 	var variable = 5;
+	if(variable != 5)
+		console.log('no' + variable + ' for you!');
+	else
+		return 4;
 }
 
 test.prototype.bla = function() {
@@ -54,13 +58,32 @@ class File
 							when 1
 								node = node.right
 						i++
+					when 'IfStatement'
+						switch selection[i]
+							when 0
+								node = node.test
+							when 1
+								node = node.consequent
+							when 2
+								node = node.alternate
+						i++
+					when 'BinaryExpression'
+						switch selection[i]
+							when 0
+								node = node.left
+							when 1
+								node = node.right
+						i++
+					when 'ReturnStatement'
+						node = node.argument[i]
+						i++
 					else
-						console.log "no resolve of #{node.type}, trying body"
 						if node.body instanceof Array
 							node = node.body[selection[i]]
 							i++
 						else
 							node = node.body
+			console.log node
 			selections[node.range[0]] = node.range[1]
 		return selections
 
