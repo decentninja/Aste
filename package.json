@@ -1,0 +1,16 @@
+{
+  "name": "aste",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Gulpfile.js",
+  "author": "",
+  "dependencies": {
+    "coffee-script": "^1.9.3",
+    "gulp": "^3.9.0",
+    "gulp-cjsx": "^3.0.0",
+    "pegjs": "^0.8.0"
+  },
+  "devDependencies": {
+    "gulp-plumber": "^1.0.1"
+  }
+}
