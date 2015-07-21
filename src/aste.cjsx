@@ -17,22 +17,36 @@ class Aste extends React.Component
 		data = this.props.data
 		children = []
 		if data.body and data.body.length > 0
-			for a in data.body
-				children.push <Aste data={a} />
+			children = data.body.map (a) ->
+				<Aste data={a} />
 		switch data.type
 			when "Program"
-				<div style={@styling} class="program">
+				<div style={@styling} className="program">
 					{children}
 				</div>
 			when "FunctionDeclaration"
-				<span class="function">
+				<span className="function">
 					function {data.id.name}() &#123;
-						{children}
+						<Aste data={data.body} />
 					&#125;
 				</span>
+			when 'ExpressionStatement'
+				data = data.expression
+				switch data.type
+					when 'CallExpression'
+						args = data.arguments.map (a) ->
+							<Aste data={a} />
+						return <span className="call">
+							{data.callee.object.name}.{data.callee.property.name}(
+								{args}
+							)
+						</span>
+					else
+						return <span className={data.type}></span>
 			else
-				return <span></span>
+				<span className={data.type}>
+					{children}
+				</span>
 
 
 React.render <Aste data={parsed} />, document.querySelector '.aste'
-console.log 'hi'
